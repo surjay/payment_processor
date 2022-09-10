@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_09_09_012027) do
+ActiveRecord::Schema.define(version: 2022_09_09_192447) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,4 +22,15 @@ ActiveRecord::Schema.define(version: 2022_09_09_012027) do
     t.index ["name"], name: "index_merchants_on_name"
   end
 
+  create_table "payment_methods", force: :cascade do |t|
+    t.bigint "merchant_id"
+    t.integer "method_type", default: 0, null: false
+    t.jsonb "data", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["merchant_id"], name: "index_payment_methods_on_merchant_id"
+    t.index ["method_type"], name: "index_payment_methods_on_method_type"
+  end
+
+  add_foreign_key "payment_methods", "merchants"
 end
