@@ -4,5 +4,7 @@ Rails.application.routes.draw do
       resources :payment_methods
       resources :transactions
     end
+    resources :transaction_audits, only: :index
+    resources :payout_audits, only: :index
   end
 end
