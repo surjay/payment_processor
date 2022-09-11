@@ -4,13 +4,21 @@ require 'rails_helper'
 
 describe V1::PaymentMethodsController, type: :request do
   let!(:merchant) { Merchant.create name: "Test Co" }
-  let!(:payment_method1) { PaymentMethod.create! merchant: merchant, method_type: :bank, bank_info: bank_info }
-  let!(:payment_method2) { PaymentMethod.create! merchant: merchant, method_type: :credit_card, credit_card_info: credit_card_info }
+  let!(:payment_method1) do
+    pm = PaymentMethod.new merchant: merchant, method_type: :bank
+    pm.set_bank_info(bank_info)
+    pm.tap(&:save!)
+  end
+  let!(:payment_method2) do
+    pm = PaymentMethod.new merchant: merchant, method_type: :credit_card
+    pm.set_cc_info(credit_card_info)
+    pm.tap(&:save!)
+  end
   let(:bank_info) { { name: "Chase", routing_number: routing_number, account_number: account_number } }
   let(:credit_card_info) { { number: cc_number, cvv: "123", zip: "12345", expiration: 1.year.from_now } }
-  let(:routing_number) { 123 }
+  let(:routing_number) { "011000015" }
   let(:account_number) { 456 }
-  let(:cc_number) { "1234556" }
+  let(:cc_number) { "42424242424242424242" }
 
   describe "#index" do
     before { get v1_merchant_payment_methods_path(merchant) }
@@ -59,12 +67,11 @@ describe V1::PaymentMethodsController, type: :request do
         expect(response).to have_http_status(:created)
         json = response.parsed_body.dig("payment_method")
         expect(json.dig("method_type")).to eq method_type.to_s
-        expect(json.dig("data", "bank_info", "routing_number")).to eq routing_number.to_s
       end
     end
 
     context "when unsuccessful" do
-      let(:params) { { bank_info: nil } }
+      let(:params) { { method_type: :bank, bank_info: nil } }
 
       it "is unsuccessful" do
         expect(response).to have_http_status(:unprocessable_entity)
@@ -82,8 +89,9 @@ describe V1::PaymentMethodsController, type: :request do
 
       it "is successful" do
         expect(response).to have_http_status(:ok)
+        account_number = response.parsed_body.dig("payment_method", "data", "bank_info", "account_number")
         expect(
-          response.parsed_body.dig("payment_method", "data", "bank_info", "account_number")
+          EncryptionService.decrypt(account_number)
         ).to eq new_account_number.to_s
       end
     end

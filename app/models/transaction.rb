@@ -23,6 +23,7 @@ class Transaction < ApplicationRecord
   private
 
   def validate_scheduled_date
+    return unless scheduled_date.present?
     return if scheduled_date > Date.current
 
     errors.add(:scheduled_date, :invalid)

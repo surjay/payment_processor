@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_09_10_194237) do
+ActiveRecord::Schema.define(version: 2022_09_11_193412) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -28,8 +28,18 @@ ActiveRecord::Schema.define(version: 2022_09_10_194237) do
     t.jsonb "data", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "default", default: false
     t.index ["merchant_id"], name: "index_payment_methods_on_merchant_id"
     t.index ["method_type"], name: "index_payment_methods_on_method_type"
+  end
+
+  create_table "payouts", force: :cascade do |t|
+    t.bigint "merchant_id"
+    t.integer "transaction_ids", default: [], array: true
+    t.decimal "total", precision: 20, scale: 2
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["merchant_id"], name: "index_payouts_on_merchant_id"
   end
 
   create_table "transactions", force: :cascade do |t|
@@ -52,6 +62,7 @@ ActiveRecord::Schema.define(version: 2022_09_10_194237) do
   end
 
   add_foreign_key "payment_methods", "merchants"
+  add_foreign_key "payouts", "merchants"
   add_foreign_key "transactions", "merchants"
   add_foreign_key "transactions", "merchants", column: "to_merchant_id"
   add_foreign_key "transactions", "payment_methods"

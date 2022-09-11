@@ -5,8 +5,12 @@ require 'rails_helper'
 describe V1::TransactionsController, type: :request do
   let(:merchant1) { Merchant.create name: "Test Co" }
   let(:merchant2) { Merchant.create name: "Other Corp" }
-  let(:payment_method) { PaymentMethod.create! merchant: merchant1, method_type: :bank, bank_info: bank_info }
-  let(:bank_info) { { name: "Chase", routing_number: 123, account_number: 456 } }
+  let(:payment_method) do
+    pm = PaymentMethod.new merchant: merchant1, method_type: :bank
+    pm.set_bank_info(bank_info)
+    pm.tap(&:save!)
+  end
+  let(:bank_info) { { name: "Chase", routing_number: "011000015", account_number: 456 } }
   let!(:transaction1) do
     Transaction.create(
       merchant: merchant1,
