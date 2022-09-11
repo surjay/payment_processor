@@ -12,6 +12,7 @@ class DebitTransaction < BaseTransaction
             else
               debit_cc
             end
+    @transaction.complete!
     total
   end
 

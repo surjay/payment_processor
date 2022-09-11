@@ -1,24 +1,50 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+* Ruby 2.7; Rails 5.2; postgres
 
-Things you may want to cover:
+Setup
+- bundle install
+- bin/rails db:migrate
 
-* Ruby version
+Run Specs
+- bundle exec rspec spec/
 
-* System dependencies
+Endpoints/Flow
 
-* Configuration
+- Create Merchant
+```ruby
+POST /v1/merchants
+{
+  name: "Company Name",
+}
+```
+- Create PaymentMethod
+```ruby
+POST /v1/merchants/:merchant_id/payment_methods 
+{
+  method_type: "bank",
+  bank_info: {
+    name: "Chase",
+    routing_number: "011000015",
+    account_number: "456"
+  }
+}
+```
+- Create Transaction 
+```ruby
+POST /v1/merchants/:merchant_id/transactions 
+{
+  to_merchant_id: 2, 
+  scheduled_type: "future", 
+  payment_method_id: 1, 
+  amount: "5252.23", 
+  scheduled_date: "2012-12-22"
+}
+```
 
-* Database creation
+- Manually Generate Payouts 
+```ruby
+GeneratePayouts.new(payout_date: "2012-12-22").perform
+```
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+This can be hooked up to a cron in the future (ie Heroku Advanced Scheduler, AWS Cloudwatch Scheduled Events, Sidekiq Scheduled Jobs, etc.)
