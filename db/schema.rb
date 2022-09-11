@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_09_09_192447) do
+ActiveRecord::Schema.define(version: 2022_09_10_194237) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,5 +32,27 @@ ActiveRecord::Schema.define(version: 2022_09_09_192447) do
     t.index ["method_type"], name: "index_payment_methods_on_method_type"
   end
 
+  create_table "transactions", force: :cascade do |t|
+    t.bigint "merchant_id"
+    t.bigint "payment_method_id"
+    t.bigint "to_merchant_id"
+    t.integer "scheduled_type", default: 0
+    t.integer "status", default: 0
+    t.date "scheduled_date"
+    t.decimal "amount", precision: 20, scale: 2
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["merchant_id"], name: "index_transactions_on_merchant_id"
+    t.index ["payment_method_id"], name: "index_transactions_on_payment_method_id"
+    t.index ["scheduled_date"], name: "index_transactions_on_scheduled_date"
+    t.index ["scheduled_type", "scheduled_date", "status"], name: "index_transactions_on_type_and_date_and_status"
+    t.index ["scheduled_type"], name: "index_transactions_on_scheduled_type"
+    t.index ["status"], name: "index_transactions_on_status"
+    t.index ["to_merchant_id"], name: "index_transactions_on_to_merchant_id"
+  end
+
   add_foreign_key "payment_methods", "merchants"
+  add_foreign_key "transactions", "merchants"
+  add_foreign_key "transactions", "merchants", column: "to_merchant_id"
+  add_foreign_key "transactions", "payment_methods"
 end
